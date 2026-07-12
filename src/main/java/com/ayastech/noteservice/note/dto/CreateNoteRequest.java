@@ -12,5 +12,5 @@ public record CreateNoteRequest(
     @Size(max = 10_000, message = "Content must not exceed 10000 characters")
     String content
 
-    ) {
+) {
 }
