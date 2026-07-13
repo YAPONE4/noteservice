@@ -2,6 +2,7 @@ package com.ayastech.noteservice.note;
 
 import com.ayastech.noteservice.note.dto.CreateNoteRequest;
 import com.ayastech.noteservice.note.dto.NoteResponse;
+import com.ayastech.noteservice.note.dto.UpdateNoteRequest;
 import com.ayastech.noteservice.note.error.NoteNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,8 +36,12 @@ public class NoteService {
         return toResponse(savedNote);
     }
 
+    private Note findNote(Long id) {
+        return noteRepository.findById(id).orElseThrow(() -> new NoteNotFoundException(id));
+    }
+
     public NoteResponse getById(Long id) {
-        return toResponse(noteRepository.findById(id).orElseThrow(() -> new NoteNotFoundException(id)));
+        return toResponse(findNote(id));
     }
 
     public Page<NoteResponse> getNotes(
@@ -51,5 +56,17 @@ public class NoteService {
             notes = noteRepository.findByTitleContainingIgnoreCase(normalizedQuery, pageable);
         }
         return notes.map(this::toResponse);
+    }
+
+    public NoteResponse updateNote(Long id, UpdateNoteRequest request) {
+        Note note = findNote(id);
+        note.update(request.title(), request.content());
+        noteRepository.saveAndFlush(note);
+        return toResponse(note);
+    }
+
+    public void deleteNote(Long id) {
+        Note note = findNote(id);
+        noteRepository.delete(note);
     }
 }

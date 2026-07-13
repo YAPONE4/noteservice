@@ -32,6 +32,11 @@ public class Note {
         this.content = content;
     }
 
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
     @PrePersist
     private void onCreate() {
         this.createdAt = Instant.now();

@@ -5,6 +5,7 @@ import com.ayastech.noteservice.note.NoteRepository;
 import com.ayastech.noteservice.note.NoteService;
 import com.ayastech.noteservice.note.dto.CreateNoteRequest;
 import com.ayastech.noteservice.note.dto.NoteResponse;
+import com.ayastech.noteservice.note.dto.UpdateNoteRequest;
 import com.ayastech.noteservice.note.error.NoteNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.not;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -77,36 +79,25 @@ public class NoteServiceTest {
 
     @Test
     void testFindAllNotesWhenNoQuery() {
-
         Pageable pageable = PageRequest.of(0, 10);
-
         Note note = new Note("First note", "First content");
-
         Page<Note> repositoryResult = new PageImpl<>(
                 List.of(note),
                 pageable,
                 1
         );
-
         when(noteRepository.findAll(pageable)).thenReturn(repositoryResult);
 
         Page<NoteResponse> result = noteService.getNotes(null, pageable);
 
         assertThat(result.getContent()).hasSize(1);
-
-        assertThat(result.getContent().getFirst().title())
-                .isEqualTo("First note");
-
-        assertThat(result.getContent().getFirst().content())
-                .isEqualTo("First content");
-
+        assertThat(result.getContent().getFirst().title()).isEqualTo("First note");
+        assertThat(result.getContent().getFirst().content()).isEqualTo("First content");
         assertThat(result.getNumber()).isZero();
         assertThat(result.getSize()).isEqualTo(10);
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getTotalPages()).isEqualTo(1);
-
         verify(noteRepository).findAll(pageable);
-
         verify(noteRepository, never()).findByTitleContainingIgnoreCase(
                         anyString(),
                         any(Pageable.class)
@@ -118,24 +109,48 @@ public class NoteServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Note matchingNote = new Note("Learning Spring Boot", "Spring content");
         Page<Note> repositoryResult = new PageImpl<>(List.of(matchingNote), pageable, 1);
-        when(noteRepository.findByTitleContainingIgnoreCase(
-                "spring",
-                pageable)).thenReturn(repositoryResult);
+        when(noteRepository.findByTitleContainingIgnoreCase("spring", pageable)).thenReturn(repositoryResult);
 
         Page<NoteResponse> result = noteService.getNotes("  spring  ", pageable);
 
         assertThat(result.getContent()).hasSize(1);
-
-        assertThat(result.getContent().getFirst().title())
-                .isEqualTo("Learning Spring Boot");
-
+        assertThat(result.getContent().getFirst().title()).isEqualTo("Learning Spring Boot");
         assertThat(result.getTotalElements()).isEqualTo(1);
-        verify(noteRepository).findByTitleContainingIgnoreCase(
-                        "spring",
-                        pageable
-                );
+        verify(noteRepository).findByTitleContainingIgnoreCase("spring", pageable);
+        verify(noteRepository, never()).findAll(any(Pageable.class));
+    }
 
-        verify(noteRepository, never())
-                .findAll(any(Pageable.class));
+    @Test
+    void testUpdateNote() {
+        Long noteId = 1L;
+        Note existingNote = new Note("Note to Update", "Note content to Update");
+        UpdateNoteRequest request = new UpdateNoteRequest("Updated Note", "Updated Note content");
+        when(noteRepository.findById(noteId)).thenReturn(Optional.of(existingNote));
+        when(noteRepository.saveAndFlush(any(Note.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0, Note.class));
+
+        NoteResponse result = noteService.updateNote(noteId, request);
+
+        assertEquals("Updated Note", result.title());
+        assertEquals("Updated Note content", result.content());
+        verify(noteRepository).findById(noteId);
+        ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
+        verify(noteRepository).saveAndFlush(noteCaptor.capture());
+        Note savedNote = noteCaptor.getValue();
+        assertEquals("Updated Note", savedNote.getTitle());
+        assertEquals("Updated Note content", savedNote.getContent()
+        );
+    }
+
+    @Test
+    void testDeleteNote() {
+        Long noteId = 1L;
+        Note existingNote = new Note("Note to Delete", "Note to Delete content");
+        when(noteRepository.findById(noteId)).thenReturn(Optional.of(existingNote));
+
+        noteService.deleteNote(noteId);
+
+        verify(noteRepository).findById(noteId);
+        verify(noteRepository).delete(existingNote);
     }
 }

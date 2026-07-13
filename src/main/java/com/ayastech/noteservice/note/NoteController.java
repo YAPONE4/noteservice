@@ -2,6 +2,7 @@ package com.ayastech.noteservice.note;
 
 import com.ayastech.noteservice.note.dto.CreateNoteRequest;
 import com.ayastech.noteservice.note.dto.NoteResponse;
+import com.ayastech.noteservice.note.dto.UpdateNoteRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,4 +43,19 @@ public class NoteController {
     ) {
         return noteService.getNotes(query, pageable);
     }
+
+    @PutMapping("/{id}")
+    public NoteResponse updateNote(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateNoteRequest request
+    ) {
+        return noteService.updateNote(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNote(@PathVariable Long id) {
+        noteService.deleteNote(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }
