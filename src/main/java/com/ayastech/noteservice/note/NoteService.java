@@ -3,7 +3,7 @@ package com.ayastech.noteservice.note;
 import com.ayastech.noteservice.note.dto.CreateNoteRequest;
 import com.ayastech.noteservice.note.dto.NoteResponse;
 import com.ayastech.noteservice.note.dto.UpdateNoteRequest;
-import com.ayastech.noteservice.note.error.NoteNotFoundException;
+import com.ayastech.noteservice.error.exception.NoteNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,23 +17,13 @@ public class NoteService {
         this.noteRepository = noteRepository;
     }
 
-    private NoteResponse toResponse(Note note) {
-        return new NoteResponse(
-                note.getId(),
-                note.getTitle(),
-                note.getContent(),
-                note.getCreatedAt(),
-                note.getUpdatedAt()
-        );
-    }
-
     public NoteResponse createNote(CreateNoteRequest request) {
         Note note = new Note(
                 request.title(),
                 request.content()
         );
         Note savedNote = noteRepository.save(note);
-        return toResponse(savedNote);
+        return savedNote.toResponse();
     }
 
     private Note findNote(Long id) {
@@ -41,7 +31,7 @@ public class NoteService {
     }
 
     public NoteResponse getById(Long id) {
-        return toResponse(findNote(id));
+        return findNote(id).toResponse();
     }
 
     public Page<NoteResponse> getNotes(
@@ -55,14 +45,14 @@ public class NoteService {
             String normalizedQuery = query.trim();
             notes = noteRepository.findByTitleContainingIgnoreCase(normalizedQuery, pageable);
         }
-        return notes.map(this::toResponse);
+        return notes.map(Note::toResponse);
     }
 
     public NoteResponse updateNote(Long id, UpdateNoteRequest request) {
         Note note = findNote(id);
         note.update(request.title(), request.content());
         noteRepository.saveAndFlush(note);
-        return toResponse(note);
+        return note.toResponse();
     }
 
     public void deleteNote(Long id) {

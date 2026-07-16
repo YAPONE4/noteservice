@@ -1,5 +1,6 @@
 package com.ayastech.noteservice.note;
 
+import com.ayastech.noteservice.note.dto.NoteResponse;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -35,6 +36,16 @@ public class Note {
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public NoteResponse toResponse () {
+        return new NoteResponse(
+                this.id,
+                this.title,
+                this.content,
+                this.createdAt,
+                this.updatedAt
+        );
     }
 
     @PrePersist

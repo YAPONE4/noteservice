@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 
 public record UpdateNoteRequest (
         @NotBlank(message = "Title must not be blank")
-        @Size(max = 200, message = "Title must not exceed 200 characters")
+        @Size(max = 100, message = "Title must not exceed 100 characters")
         String title,
 
         @Size(max = 10_000, message = "Content must not exceed 10000 characters")

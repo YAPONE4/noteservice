@@ -1,4 +1,4 @@
-package com.ayastech.noteservice.note.error;
+package com.ayastech.noteservice.error.exception;
 
 public class NoteNotFoundException extends RuntimeException {
 

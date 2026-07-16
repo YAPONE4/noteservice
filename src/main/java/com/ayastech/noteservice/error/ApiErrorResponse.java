@@ -1,4 +1,4 @@
-package com.ayastech.noteservice.note.error;
+package com.ayastech.noteservice.error;
 
 import java.time.Instant;
 import java.util.Map;

@@ -1,6 +1,7 @@
-package com.ayastech.noteservice.note.error;
+package com.ayastech.noteservice.error;
 
-import com.ayastech.noteservice.note.Note;
+import com.ayastech.noteservice.error.exception.InvalidFileException;
+import com.ayastech.noteservice.error.exception.NoteNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +55,23 @@ public class GlobalExceptionHandler {
                 "Request validation failed",
                 request.getRequestURI(),
                 fieldErrors
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(InvalidFileException.class)
+    public ResponseEntity<ApiErrorResponse> handleEmptyAudioException(
+            InvalidFileException exception,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);

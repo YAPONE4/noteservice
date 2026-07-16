@@ -6,7 +6,7 @@ import com.ayastech.noteservice.note.NoteService;
 import com.ayastech.noteservice.note.dto.CreateNoteRequest;
 import com.ayastech.noteservice.note.dto.NoteResponse;
 import com.ayastech.noteservice.note.dto.UpdateNoteRequest;
-import com.ayastech.noteservice.note.error.NoteNotFoundException;
+import com.ayastech.noteservice.error.exception.NoteNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
