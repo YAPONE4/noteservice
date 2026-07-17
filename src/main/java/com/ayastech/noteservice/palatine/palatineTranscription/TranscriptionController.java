@@ -1,7 +1,9 @@
 package com.ayastech.noteservice.palatine.palatineTranscription;
 
 
+import com.ayastech.noteservice.note.dto.NoteResponse;
 import com.ayastech.noteservice.palatine.palatineTranscription.dto.TranscriptionResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,5 +38,11 @@ public class TranscriptionController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PostMapping("/{id}")
+    public ResponseEntity<NoteResponse> writeTranscriptionToNote(@PathVariable Long id) throws JsonProcessingException {
+        NoteResponse response = transcriptionService.writeTranscriptionToNote(id);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
 }

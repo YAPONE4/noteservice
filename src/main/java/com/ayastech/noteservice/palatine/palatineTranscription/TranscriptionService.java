@@ -3,12 +3,16 @@ package com.ayastech.noteservice.palatine.palatineTranscription;
 import com.ayastech.noteservice.error.exception.InvalidFileException;
 import com.ayastech.noteservice.error.exception.NoteNotFoundException;
 import com.ayastech.noteservice.note.NoteService;
+import com.ayastech.noteservice.note.dto.CreateNoteRequest;
+import com.ayastech.noteservice.note.dto.NoteResponse;
 import com.ayastech.noteservice.palatine.PalatineSpeechClient;
 import com.ayastech.noteservice.palatine.palatineTranscription.dto.CreateTranscriptionRequest;
 import com.ayastech.noteservice.palatine.palatineTranscription.dto.TranscriptionResponse;
 import com.ayastech.noteservice.palatine.palatineTranscription.dto.TranscriptionStartResponse;
 import com.ayastech.noteservice.palatine.palatineTranscription.dto.UpdateTranscriptionRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -92,8 +96,21 @@ public class TranscriptionService {
         return updateTranscription(id, updateTranscriptionRequest);
     }
 
+    public NoteResponse writeTranscriptionToNote(Long id) throws JsonProcessingException {
 
+        TranscriptionResponse response = findTranscription(id).toResponse();
 
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonNode = mapper.readTree(response.content());
+
+        CreateNoteRequest request = new CreateNoteRequest(
+                response.title(),
+                jsonNode.get("data").get("text").toString()
+        );
+
+        return noteService.createNote(request);
+
+    }
 
     private String createTitleFromFilename(MultipartFile file) {
         String filename = file.getOriginalFilename();
@@ -105,4 +122,6 @@ public class TranscriptionService {
         return "Transcription: " + filename;
 
     }
+
+
 }
